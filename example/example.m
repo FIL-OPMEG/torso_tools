@@ -4,15 +4,15 @@ clc
 
 % Should run with the FIL copy of SPM
 
-addpath D:\Documents\MATLAB\torso_tools\
+% addpath D:\Documents\MATLAB\torso_tools\
 
-% load D:\thorax_model\sven\sourcespace_raw.mat
-% load D:\thorax_model\sven\backmodel.mat
-load D:\thorax_model\sven\sim_combined_sensors.mat
+load(fullfile(tt_path,'example','sensors.mat'));
 
 %% Register the thorax to subject model
 
-subject = ft_read_headshape('D:\thorax_model\sven\seated_body_registered.stl');
+fname = fullfile(tt_path,'example','seated_body_registered.stl');
+
+subject = ft_read_headshape(fname);
 p = [];
 p.vertices = subject.pos;
 p.faces = subject.tri;
@@ -61,7 +61,7 @@ tt_check_registration(S);
 
 [bmeshes_reg, names] = tt_load_meshes(T);
 
-id = find(contains(names,'thorax'));
+id = find(contains(names,'torso'));
 
 
 src = ft_convert_units(src,'mm');
