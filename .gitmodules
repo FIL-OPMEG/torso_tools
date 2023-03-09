@@ -1,0 +1,3 @@
+[submodule "hbf_lc_p"]
+	path = hbf_lc_p
+	url = https://github.com/MattiStenroos/hbf_lc_p
