@@ -1,0 +1,89 @@
+clearvars
+close all
+clc
+
+% Should run with the FIL copy of SPM
+
+addpath D:\Documents\MATLAB\torso_tools\
+
+% load D:\thorax_model\sven\sourcespace_raw.mat
+% load D:\thorax_model\sven\backmodel.mat
+load D:\thorax_model\sven\sim_combined_sensors.mat
+
+%% Register the thorax to subject model
+
+subject = ft_read_headshape('D:\thorax_model\sven\seated_body_registered.stl');
+p = [];
+p.vertices = subject.pos;
+p.faces = subject.tri;
+p2 = reducepatch(p,0.6);
+subject.pos = p2.vertices;
+subject.tri = p2.faces;
+
+mesh = [];
+mesh.vertices = subject.pos;
+mesh.faces = subject.tri;
+
+
+spm_mesh_render(p2);
+
+% get the fiducuals of the torso
+% - left shoulder   (pt ?)
+% - right shoulder  (pt ?)
+% - low spine       (pt ?)
+sub_fids = [1072 -614 161
+    618 -569 145
+    864 -466 -330];
+
+
+S = [];
+S.subject = mesh; 
+S.fiducials = sub_fids;
+S.plot = 0;
+
+T = tt_register_thorax(S);
+
+
+%% Try and plot the model 
+
+S = [];
+S.subject = mesh;
+S.T = T;
+S.sensors = ft_convert_units(grad,'mm'); % <-  check the units
+
+tt_check_registration(S);
+
+%% Determine which sources are inside the BEM to compare + plot
+
+[bmeshes_reg, names] = tt_load_meshes(T);
+
+id = find(contains(names,'thorax'));
+
+src = ft_convert_units(src,'mm');
+grad = ft_convert_units(grad,'mm');
+
+for ii = 1:length(src.pos)
+
+    
+    tmp = src.pos(ii,:); 
+    inside(ii) = tt_is_inside(tmp,...
+        bmeshes_reg{id}.vertices,bmeshes_reg{id}.faces);
+    
+    
+end
+
+sum(inside)
+inid = find(inside);
+
+scatter3(src.pos(inid,1),src.pos(inid,2),src.pos(inid,3),'y*')
+
+
+%% Forward modelling - Stenroos' BEM
+
+
+S = [];
+S.pos = src.pos(inid,:);
+S.T = T;
+S.sensors = grad;
+
+Ls = tt_fwd_bem3(S);
