@@ -43,9 +43,14 @@ sub_fids = [1072 -614 161
 S = [];
 S.subject = mesh; 
 S.fiducials = sub_fids;
-S.plot = 1;
+S.plot = 0;
 
 T = tt_register_torso(S);
+
+%% Get the units of the registered mesh
+
+tmp = tt_load_meshes(T);
+[unit, sf] = tt_determine_mesh_units(tmp);
 
 
 %% Try and plot the model 
@@ -53,41 +58,31 @@ T = tt_register_torso(S);
 S = [];
 S.subject = mesh;
 S.T = T;
-S.sensors = ft_convert_units(grad,'mm'); % <-  check the units
+S.sensors = ft_convert_units(grad,unit); % <-  check the units
 
 tt_check_registration(S);
 
-%% Determine which sources are inside the BEM to compare + plot
+%% Generate the source space
 
-[bmeshes_reg, names] = tt_load_meshes(T);
+S = [];
+S.subject = mesh;
+S.T = T;
+S.width = 80;
+S.depth = 20:10:80;
+S.resolution = 10;
+S.mask = 1;
 
-id = find(contains(names,'torso'));
+src = tt_generate_spine_grid(S);
 
-
-src = ft_convert_units(src,'mm');
-grad = ft_convert_units(grad,'mm');
-
-for ii = 1:length(src.pos)
-
-    
-    tmp = src.pos(ii,:); 
-    inside(ii) = tt_is_inside(tmp,...
-        bmeshes_reg{id}.vertices,bmeshes_reg{id}.faces);
-    
-    
-end
-
-sum(inside)
-inid = find(inside);
-
-scatter3(src.pos(inid,1),src.pos(inid,2),src.pos(inid,3),'y*')
+scatter3(src.pos(:,1),src.pos(:,2),src.pos(:,3),'y.')
 
 
 %% Forward modelling - Stenroos' BEM
 
+src = ft_convert_units(src,'m'); % sources need to be in meters for BEM
 
 S = [];
-S.pos = src.pos(inid,:);
+S.pos = src.pos;
 S.T = T;
 S.sensors = grad;
 
