@@ -3,8 +3,8 @@ function tt_add_bem
 
 addpath(fullfile(tt_path,'hbf_lc_p'));
 
-if isempty('hbf_SetPaths')
-    disp('Cloning BEM library to respoistory!')
+if isempty(which('hbf_SetPaths'))
+    disp('Cloning BEM library to repository!')
     !git submodule update --init
 end
 
