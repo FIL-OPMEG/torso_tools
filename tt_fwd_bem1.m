@@ -2,6 +2,7 @@ function L = tt_generate_fwds_bem1(S);
 % Generate the lead fields for a 1-shell bem of the chest;
 
 if ~isfield(S,'pos'); error('please specify the source positions!'); end
+if ~isfield(S,'posunits'); error('please specify the current positiosn units!');end
 if ~isfield(S,'ori'); S.ori = []; end
 if ~isfield(S,'sensors'); error('please specify the sensor structure!'); end
 if ~isfield(S,'T'); S.T = eye(4); end
@@ -15,7 +16,7 @@ end
 [~, sf] = tt_determine_mesh_units(meshes);
 bmeshes = {};
 
-bid = find(contains(names,'thorax'));
+bid = find(contains(names,'torso'));
 bmeshes{1}.p = meshes{bid}.vertices/sf; % conform to m;
 bmeshes{1}.e = meshes{bid}.faces;
 
@@ -27,6 +28,7 @@ S.sensors = ft_convert_units(S.sensors,'m');
 cfg                     = [];
 cfg.method              = 'basedonpos';
 cfg.sourcemodel.pos     = S.pos;
+cfg.sourcemodel.unit     = S.posunits;
 src                     = ft_prepare_sourcemodel(cfg);
 src                     = ft_convert_units(src,'m');
 

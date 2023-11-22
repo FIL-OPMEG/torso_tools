@@ -8,17 +8,18 @@ if ~isfield(S,'dist'); S.dist = 0.06; end
 if ~isfield(S,'plot'); S.plot = false; end
 
 
+
 % Load the canonical torso, generate fiducials
 %----------------------------------------------
-torso = export(gifti(fullfile(tt_path,'torso.gii')),'patch'); % Units: m
+thorax = export(gifti(fullfile(tt_path,'thorax.gii')),'patch'); % Units: m
 
 % fiducuals of the torso
 % - left shoulder   (pt 230)
 % - right shoulder  (pt 1)
 % - low spine       (pt 409)
-thorax_fids = [torso.vertices(230,:);
-    thorax.vertices(1954,:);
-    thorax.vertices(1302,:)];
+thorax_fids = [thorax.vertices(230,:);
+    thorax.vertices(1,:);
+    thorax.vertices(409,:)];
 
 % Register part 0: get the two meshes into similar units
 %--------------------------------------------------------

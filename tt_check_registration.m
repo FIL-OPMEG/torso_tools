@@ -6,12 +6,12 @@ if ~isfield(S,'sensors') S.sensors = []; end
 
 figure
 ft_plot_mesh(S.subject,'facecolor','none','edgecolor','k',...
-    'clipping','off','edgealpha',0.1);
+    'clipping','off','edgealpha',0.5);
 
 hold on
 
 colours = {'r','g','b'};
-alpha = [0.3 0.3 0.2];
+alpha = [0.3 0.3 0.3];
 
 meshes = tt_load_meshes(S.T);
 unit = tt_determine_mesh_units(meshes);
