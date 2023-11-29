@@ -15,7 +15,7 @@ if isempty(which('hbf_BEMOperatorsPhi_LC'));
     tt_add_bem;
 end
 
-meshes = tt_load_meshes_grb(S.T,S.names);
+meshes = tt_load_meshes(S.T,S.names);
 [~, sf] = tt_determine_mesh_units(meshes);
 bmeshes = {};
 
