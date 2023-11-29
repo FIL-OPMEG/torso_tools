@@ -4,6 +4,7 @@ if ~isfield(S,'T'); error('please provide the transformation matrix!'); end
 if ~isfield(S,'resolution');    S.resolution = 10;      end
 if ~isfield(S,'depth');         S.depth = 10;      end
 if ~isfield(S,'frontflag');         S.frontflag = 0;      end
+if ~isfield(S,'zlim');         S.zlim = [];      end
 
 %-rotate the body scan for easier grid generation later
 %-----------------------------------------------------
@@ -45,6 +46,10 @@ max_x = max(torso_rot.vertices(:,1));
 min_z = min(torso_rot.vertices(:,3));
 max_z = max(torso_rot.vertices(:,3));
 
+if ~isempty(S.zlim),
+    min_z=max(min_z,S.zlim(1));
+    max_z=min(max_z,S.zlim(2));
+end;
 if S.frontflag,
     y_start = hp(2) - 10*tmp(2);
 else
@@ -101,7 +106,8 @@ for ii = 1:numel(xgrid)
         ang = abs(acosd(dot(nrm,ray)));
         ang = min(ang,180-abs(ang));
 
-        if ang < 60
+        if ang < 90 %% keep more
+        
             plane_x1(end+1) = P(pid,1);
             plane_y1(end+1) = P(pid,2);
             plane_z1(end+1) = P(pid,3);
