@@ -1,8 +1,9 @@
-function grad = tt_generate_sensor_array(S)
+function grad = tt_generate_sensor_array_grb(S)
 if ~isfield(S,'subject'); error('please provide subject mesh!'); end
 if ~isfield(S,'T'); error('please provide the transformation matrix!'); end
 if ~isfield(S,'resolution');    S.resolution = 10;      end
 if ~isfield(S,'depth');         S.depth = 10;      end
+if ~isfield(S,'frontflag');         S.frontflag = 0;      end
 
 %-rotate the body scan for easier grid generation later
 %-----------------------------------------------------
@@ -30,6 +31,10 @@ fids = tt_get_template_fids(R1*S.T);
 tmp = fids(3,:) - hp;
 ydir = heaviside(tmp(2));
 
+if S.frontflag,
+    ydir=~ydir;
+end;
+
 % get units to scale space with later;
 unit = tt_determine_mesh_units(tt_load_meshes(R1*S.T));
 
@@ -40,9 +45,20 @@ max_x = max(torso_rot.vertices(:,1));
 min_z = min(torso_rot.vertices(:,3));
 max_z = max(torso_rot.vertices(:,3));
 
-y_start = hp(2) + 10*tmp(2);
+if S.frontflag,
+    y_start = hp(2) - 10*tmp(2);
+else
+    y_start = hp(2) + 10*tmp(2);
+end;
+
 [xgrid,ygrid,zgrid] = meshgrid(min_x:S.resolution:max_x...
     ,y_start,min_z:S.resolution:max_z);
+t1=torso_rot.vertices;
+figure;
+plot3(t1(:,1),t1(:,2),t1(:,3),'r.');axis equal; hold on;
+plot3(t1(:,1),ones(size(t1(:,2))).*y_start,t1(:,3),'b.');axis equal
+
+
 
 switch ydir
     case 1
@@ -51,9 +67,11 @@ switch ydir
         ray = [0 1 0];
 end
 
+
 % First pass based on the torso
 G = gifti(torso_rot);
 [~,nrms] = spm_mesh_normals(G);
+
 fprintf('Generating sensor positions: Pass 1/2\n')
 
 plane_x1 = [];
@@ -133,11 +151,11 @@ plane_y2(id) = [];
 plane_z1(id) = [];
 plane_z2(id) = [];
 
-switch ydir
+switch ydir %% 1 for sensors on back in example subj
     case 1
         plane_y = max([plane_y1; plane_y2]);
     case 0
-        plane_y = max([plane_y1; plane_y2]);
+        plane_y = min([plane_y1; plane_y2]);
 end
 
 fprintf('COMPLETE!\n')

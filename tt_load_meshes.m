@@ -1,13 +1,25 @@
-function [meshes, names] = tt_load_meshes(T)
+function [meshes, names] = tt_load_meshes_grb(T,names)
 
 % Load meshes, optional argument to give affine matrix to transform;
+% optional names allows one to specify other gifti meshes in tt directory
 
-if ~nargin
+if nargin<2,
+    names=[];
+end;
+
+if nargin<1
+    T=[];
+end;
+
+if isempty(T),
     T = eye(4);
-end
+end;
+
+if isempty(names)
+    names = {'blood','lungs','torso'};
+end;
 
 meshes = {};
-names = {'blood','lungs','torso'};
 
 for ii = 1:numel(names);
     
