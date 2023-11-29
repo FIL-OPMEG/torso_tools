@@ -6,6 +6,7 @@ if ~isfield(S,'width');         S.width = 80;           end
 if ~isfield(S,'depth');         S.depth = 10:10:80;     end
 if ~isfield(S,'resolution');    S.resolution = 10;      end
 if ~isfield(S,'mask');          S.mask = 1;             end
+if ~isfield(S,'zlim');          S.zlim = [-Inf Inf];             end
 
 %-rotate the body scan for easier grid generation later
 %-----------------------------------------------------
@@ -39,8 +40,11 @@ unit = tt_determine_mesh_units(tt_load_meshes(R1*S.T));
 %--------------------------------------------------------------------
 bk = sub2.vertices;
 x_midline = hp(1);
-z_midline = 0.5*(min(bk(:,3))+max(bk(:,3)));
-z_range = range(bk(:,3));
+maxz=min(max(bk(:,3)),S.zlim(2));
+minz=max(min(bk(:,3)),S.zlim(1));
+z_midline = 0.5*(minz+maxz);
+z_range = maxz-minz;
+
 
 % Generate plane
 min_x = min([(x_midline - 0.5*S.width) (x_midline + 0.5*S.width)]);
