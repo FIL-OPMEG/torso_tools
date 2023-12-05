@@ -9,6 +9,7 @@ if ~isfield(S,'T'); S.T = eye(4); end
 if ~isfield(S,'names'); S.names = {'blood','lungs','torso'}; end;
 if ~isfield(S,'ci'); S.ci = [.62 .05 .23]; end
 if ~isfield(S,'co'); S.co = [.23 .23  0 ]; end
+if ~isfield(S,'isa'); S.isa = []; end
 
 
 if isempty(which('hbf_BEMOperatorsPhi_LC'));
@@ -26,7 +27,7 @@ for ii = 1:numel(meshes)
     plot3(bmeshes{ii}.p(:,1),bmeshes{ii}.p(:,2),bmeshes{ii}.p(:,3),'m.')
 end
 
-% get sensors into meters 
+% get sensors into meters
 S.sensors = ft_convert_units(S.sensors,'m');
 
 % get the source space into meters
@@ -52,7 +53,12 @@ co = S.co;
 
 % Generate transfer matrix
 D = hbf_BEMOperatorsPhi_LC(bmeshes);
-Tphi_full = hbf_TM_Phi_LC(D,ci,co);
+if isempty(S.isa)
+    Tphi_full = hbf_TM_Phi_LC(D,ci,co);
+else
+    fprintf('%-40s: %30s\n','Applying ISA', S.names{S.isa});
+    Tphi_full = hbf_TM_Phi_LC_ISA2(D,ci,co,S.isa);
+end
 DB = hbf_BEMOperatorsB_Linear(bmeshes,coils);
 TB = hbf_TM_Bvol_Linear(DB,Tphi_full,ci,co);
 
