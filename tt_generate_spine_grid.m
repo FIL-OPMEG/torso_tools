@@ -53,7 +53,8 @@ min_z = min([(z_midline - 0.4*z_range) (z_midline + 0.4*z_range)]);
 max_z = max([(z_midline - 0.5*z_range) (z_midline + 0.5*z_range)]);
 
 y_start = hp(2) + 10*tmp(2);
-[xgrid,ygrid,zgrid] = meshgrid(min_x:10:max_x,y_start,min_z:10:max_z);
+[xgrid,ygrid,zgrid] = meshgrid(min_x:S.resolution:max_x,y_start,...
+    min_z:S.resolution:max_z);
 switch ydir
     case 1
         ray = [0 -1 0];
