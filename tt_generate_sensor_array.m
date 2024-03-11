@@ -1,10 +1,12 @@
-function grad = tt_generate_sensor_array_grb(S)
+function grad = tt_generate_sensor_array(S)
+
 if ~isfield(S,'subject'); error('please provide subject mesh!'); end
 if ~isfield(S,'T'); error('please provide the transformation matrix!'); end
 if ~isfield(S,'resolution');    S.resolution = 10;      end
 if ~isfield(S,'depth');         S.depth = 10;      end
 if ~isfield(S,'frontflag');         S.frontflag = 0;      end
 if ~isfield(S,'zlim');         S.zlim = [];      end
+if ~isfield(S,'triaxial');     S.triaxial = 1; end
 
 %-rotate the body scan for easier grid generation later
 %-----------------------------------------------------
@@ -107,7 +109,7 @@ for ii = 1:numel(xgrid)
         ang = min(ang,180-abs(ang));
 
         if ang < 90 %% keep more
-        
+
             plane_x1(end+1) = P(pid,1);
             plane_y1(end+1) = P(pid,2);
             plane_z1(end+1) = P(pid,3);
@@ -174,17 +176,29 @@ grid_all = [plane_x1; plane_y; plane_z1]'- ray*S.depth;
 %-make FT style source grad container, transform back to orig space
 %-------------------------------------------------------------------
 grad = [];
-grad.coilpos = repmat(grid_all,3,1);
-grad.coilori = [repmat([1 0 0],length(grid_all),1);...
-    repmat([0 1 0],length(grid_all),1);...
-    repmat([0 0 1],length(grid_all),1)];
-grad.label = [];
-for prefix = {'X','Y','Z'}
-    for ii = 1:length(grid_all)
-        grad.label{end+1} = sprintf('mag-%04d-%s',ii,prefix{:});
+if S.triaxial
+    grad.coilpos = repmat(grid_all,3,1);
+    grad.coilori = [repmat([1 0 0],length(grid_all),1);...
+        repmat([0 1 0],length(grid_all),1);...
+        repmat([0 0 1],length(grid_all),1)];
+    grad.label = [];
+    for prefix = {'X','Y','Z'}
+        for ii = 1:length(grid_all)
+            grad.label{end+1} = sprintf('mag-%04d-%s',ii,prefix{:});
+        end
+    end
+    grad.label = grad.label';
+else % make it just one axis
+    grad.coilpos = grid_all;
+    grad.coilori = repmat([0 1 0],length(grid_all),1);
+    grad.label = [];
+    for prefix = {'Y'}
+        for ii = 1:length(grid_all)
+            grad.label{end+1} = sprintf('mag-%04d-%s',ii,prefix{:});
+        end
     end
 end
-grad.label = grad.label';
+
 grad.tra = speye(numel(grad.label));
 [grad.chanunit{1:numel(grad.label)}] = deal('T');
 [grad.chantype{1:numel(grad.label)}] = deal('megmag');
@@ -193,7 +207,6 @@ grad = ft_datatype_sens(grad, 'amplitude', 'T', 'distance', unit);
 grad = ft_transform_geometry(inv(R1),grad);
 
 end
-
 function M = rotmatZ(deg,cp)
 % make a rotation matrix around the Z axis centered at a point of choice
 MT = [1 0 0 -cp(1);
