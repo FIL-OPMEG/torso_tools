@@ -61,9 +61,9 @@ end;
 [xgrid,ygrid,zgrid] = meshgrid(min_x:S.resolution:max_x...
     ,y_start,min_z:S.resolution:max_z);
 t1=torso_rot.vertices;
-figure;
-plot3(t1(:,1),t1(:,2),t1(:,3),'r.');axis equal; hold on;
-plot3(t1(:,1),ones(size(t1(:,2))).*y_start,t1(:,3),'b.');axis equal
+% figure;
+% plot3(t1(:,1),t1(:,2),t1(:,3),'r.');axis equal; hold on;
+% plot3(t1(:,1),ones(size(t1(:,2))).*y_start,t1(:,3),'b.');axis equal
 
 
 
